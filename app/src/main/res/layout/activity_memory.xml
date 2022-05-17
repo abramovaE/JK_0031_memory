@@ -17,7 +17,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:spanCount="4"
+        tools:spanCount="4"
         tools:itemCount="16"
         tools:listitem="@layout/memory_item" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
         var selectedPosition = 0
         var sharedPreferences = getSharedPreferences("memory_sp", Context.MODE_PRIVATE)
         var spSelectedPosition = sharedPreferences.getInt("selected_position", selectedPosition)
+        var itemsString = sharedPreferences.getString("itemsString", "")
+        var visibilityString = sharedPreferences.getString("visibilityString", "")
 
         val modes = arrayOf("2x2", "4x4", "6x6", "8x8")
         bining.apply {
@@ -48,6 +50,20 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra("selectedMode", selectedPosition)
                 startActivity(intent)
             })
+
+            if(!itemsString.isNullOrBlank() && !visibilityString.isNullOrBlank()){
+                continueImgBtn.visibility = View.VISIBLE
+                continueImgBtn.setOnClickListener({
+                    var intent = Intent(this@MainActivity, MemoryActivity::class.java)
+                    intent.putExtra("itemsString", itemsString)
+                    intent.putExtra("visibilityString", visibilityString)
+                    startActivity(intent)
+                })
+            } else {
+                continueImgBtn.visibility = View.GONE
+            }
+
+
         }
 
         setContentView(bining.root)
