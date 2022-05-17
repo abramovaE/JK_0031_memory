@@ -139,31 +139,47 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
 
     override fun onClickItem(position: Int) {
         if(isClickable) {
+
             clickedPositions.add(position)
             binding.recyclerView
-                .findViewHolderForAdapterPosition(position)?.itemView?.findViewById<TextView>(R.id.textView)?.text =
+                .findViewHolderForAdapterPosition(position)?.itemView?.
+                findViewById<TextView>(R.id.textView)?.text =
                 contentArray[position]
 
             if (clickedPositions.size == 2) {
-                val position1 = clickedPositions.first()
-                val position2 = clickedPositions.last()
-                val item1 = contentArray[position1]
-                val item2 = contentArray[position2]
-                if (item1 == item2) {
-                    setInvisible(position1)
-                    setInvisible(position2)
-                    hiddenCount += 2
-                    if (hiddenCount == cardsCount) {
-                        val intent = Intent(this, FinalActivity::class.java)
-                        intent.putExtra(SELECTED_POSITION_TAG, selectedMode)
-                        startActivity(intent)
-                    }
-                } else {
-                    setQuestion(position1)
-                    setQuestion(position2)
-                }
-                clickedPositions.clear()
+                isClickable = false
             }
+
+            var timer = object: CountDownTimer(1000, 1000){
+                override fun onTick(p0: Long) {}
+                override fun onFinish() {
+                    if (clickedPositions.size == 2) {
+
+                        val position1 = clickedPositions.first()
+                        val position2 = clickedPositions.last()
+                        val item1 = contentArray[position1]
+                        val item2 = contentArray[position2]
+                        if (item1 == item2) {
+                            setInvisible(position1)
+                            setInvisible(position2)
+                            hiddenCount += 2
+                            if (hiddenCount == cardsCount) {
+                                val intent = Intent(this@MemoryActivity, FinalActivity::class.java)
+                                intent.putExtra(SELECTED_POSITION_TAG, selectedMode)
+                                startActivity(intent)
+                            }
+                        } else {
+                            setQuestion(position1)
+                            setQuestion(position2)
+                        }
+                        clickedPositions.clear()
+                        isClickable = true
+                    }
+
+                }
+            }
+            timer.start()
+
         }
     }
 
@@ -181,6 +197,7 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
     }
 
     override fun onStop() {
+        Log.d("TAG", "onStop()")
         super.onStop()
         val items = contentArray
 
@@ -207,8 +224,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
             .putString(ITEMS_STRING, itemsString.toString())
             .putString(VISIBILITY_STRING, visibilityString.toString())
             .putInt(SELECTED_POSITION_TAG, selectedMode)
-            .apply()
+            .commit()
     }
+
+
 
 }
 

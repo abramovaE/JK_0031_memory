@@ -8,6 +8,7 @@ import com.template.databinding.ActivityMainBinding
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.view.View
 
 
@@ -20,17 +21,33 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    private var spSelectedPosition = 0
+    private var itemsString = ""
+    private var visibilityString = ""
+    private var selectedMode = 0
+    private lateinit var sharedPreferences: SharedPreferences
+
+    fun load(){
+
+        sharedPreferences = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
+        spSelectedPosition = sharedPreferences.getInt(SELECTED_POSITION_TAG, 0)
+        itemsString = sharedPreferences.getString(ITEMS_STRING, "")
+        visibilityString = sharedPreferences.getString(VISIBILITY_STRING, "")
+        selectedMode = sharedPreferences.getInt(SELECTED_POSITION_TAG, 0)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        load()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         var selectedPosition = 0
-        val sharedPreferences = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
-        val spSelectedPosition = sharedPreferences.getInt(SELECTED_POSITION_TAG, selectedPosition)
-        val itemsString = sharedPreferences.getString(ITEMS_STRING, "")
-        val visibilityString = sharedPreferences.getString(VISIBILITY_STRING, "")
-        val selectedMode = sharedPreferences.getInt(SELECTED_POSITION_TAG, 0)
 
+        load()
 
         val modes = arrayOf("2x2", "4x4", "6x6", "8x8")
         binding.apply {
