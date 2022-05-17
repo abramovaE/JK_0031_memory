@@ -5,27 +5,34 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import android.view.TextureView
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.template.databinding.ActivityMemoryBinding
 import java.lang.StringBuilder
-import java.util.*
+import kotlin.math.sqrt
 
 
 class MemoryActivity: AppCompatActivity(), OnClickPairListener {
+
+    private val SHARED_PREF_NAME = "memory_sp"
+    private val SELECTED_POSITION_TAG = "selected_position"
+    private val ITEMS_STRING = "itemsString"
+    private val VISIBILITY_STRING = "visibilityString"
+
     private lateinit var binding: ActivityMemoryBinding
     private var clickedPositions = mutableSetOf<Int>()
     private lateinit var contentArray: Array<String>
-    private lateinit var visibility: Array<Int>
+    private var visibility = emptyArray<Int>()
 
     private lateinit var memoryAdapter: MemoryAdapter
     private var hiddenCount = 0
-    private var cardsCount = 0;
+    private var cardsCount = 0
+    private var spanCount = 0
 
-//    private val itemsStringTa
+    private val question = "❓"
+
     private var memoryContent = arrayOf(
         "\uD83D\uDE97", "\uD83D\uDE95", "\uD83D\uDE99", "\uD83D\uDE8C",
         "\uD83D\uDE8E", "\uD83C\uDFCE", "\uD83D\uDE93", "\uD83D\uDE91",
@@ -42,29 +49,33 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMemoryBinding.inflate(layoutInflater)
 
-        var selectedMode = intent.getIntExtra("selectedMode", 0)
-        var itemsString = intent.getStringExtra("itemsString")
-        var visibilityString = intent.getStringExtra("visibilityString")
+        val selectedMode = intent.getIntExtra(SELECTED_POSITION_TAG, 0)
+        val itemsString = intent.getStringExtra(ITEMS_STRING)
+        val visibilityString = intent.getStringExtra(VISIBILITY_STRING)
+
         if (!itemsString.isNullOrBlank() && !visibilityString.isNullOrBlank()) {
             continueGame(itemsString, visibilityString)
 
-
         } else{
-
             createNewGame(selectedMode)
         }
+
+        memoryAdapter = MemoryAdapter(contentArray, this)
+        val manager = binding.recyclerView.layoutManager as GridLayoutManager
+        manager.spanCount = spanCount
+        binding.recyclerView.adapter = memoryAdapter
+
+//        binding.recyclerView.isClickable = false
 
         showAllCards()
         val timer = object : CountDownTimer(3000, 1000) {
             override fun onTick(p0: Long) {
-                Log.d("TAG", "onTick()")
             }
             override fun onFinish() {
                 hideAllCards()
             }
         }
         timer.start()
-
         setContentView(binding.root)
     }
 
@@ -73,52 +84,34 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
 
         contentArray = itemsString.split("***").toTypedArray()
         cardsCount = contentArray.size
-        var visibilityArray = visibilityString.split("***").toTypedArray()
-        visibility = emptyArray()
+        val visibilityArray = visibilityString.split("***").toTypedArray()
         for(item in visibilityArray){
             visibility += item.toInt()
         }
-        memoryAdapter = MemoryAdapter(contentArray, visibility, this)
-        val manager = binding.recyclerView.layoutManager as GridLayoutManager
-        manager.spanCount = Math.sqrt(cardsCount * 1.0).toInt()
-        binding.recyclerView.adapter = memoryAdapter
+        spanCount = sqrt(cardsCount * 1.0).toInt()
     }
 
     private fun createNewGame(selectedMode: Int){
-        Log.d("TAG", "createNewGame()")
         val mode = arrayOf(2, 4, 6, 8)
-        cardsCount = mode[selectedMode] * mode[selectedMode] / 2
-        Log.d("TAG", "cardsCount: $cardsCount")
-        val cards = memoryContent.copyOfRange(0, cardsCount)
+        cardsCount = mode[selectedMode] * mode[selectedMode]
+        val cardsPair = cardsCount / 2
 
-        visibility = emptyArray<Int>()
-        for(index in 0 until (mode[selectedMode] * mode[selectedMode])){
+        for(index in 0 until cardsCount){
             visibility += View.VISIBLE
         }
 
-
-        Log.d("TAG", "cards: ${cards.size}")
         val content = mutableListOf<String>()
-        content.addAll(cards)
-        content.addAll(cards)
+        content.addAll(memoryContent.copyOfRange(0, cardsPair))
+        content.addAll(memoryContent.copyOfRange(0, cardsPair))
         content.shuffle()
+
         contentArray = content.toTypedArray()
-        memoryAdapter = MemoryAdapter(contentArray, visibility, this)
-        val manager = binding.recyclerView.layoutManager as GridLayoutManager
-        manager.spanCount = mode[selectedMode]
-        binding.recyclerView.adapter = memoryAdapter
-
-        Log.d("TAG", "visibility: ${Arrays.toString(visibility)}")
-        Log.d("TAG", "content: ${Arrays.toString(contentArray)}")
-
-
-
+        spanCount = mode[selectedMode]
     }
 
 
-    fun showAllCards(){
-        Log.d("TAG", "show all cards, count: ${memoryAdapter.itemCount}")
-        var count = memoryAdapter.itemCount
+    private fun showAllCards(){
+        val count = memoryAdapter.itemCount
         for(i in 0 until count){
             binding.recyclerView
                 .findViewHolderForAdapterPosition(i)?.
@@ -127,27 +120,17 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
     }
 
     fun hideAllCards(){
-        Log.d("TAG", "hide all cards")
-
-        var count = memoryAdapter.itemCount
-        for(i in 0 until count){
+        for(i in 0 until memoryAdapter.itemCount){
             if(visibility[i] != View.INVISIBLE) {
-                binding.recyclerView
-                    .findViewHolderForAdapterPosition(i)?.itemView?.findViewById<TextView>(R.id.textView)?.text =
-                    "?"
-            }
-            else {
-                binding.recyclerView
-                    .findViewHolderForAdapterPosition(i)?.itemView?.visibility = View.INVISIBLE
+                setQuestion(i)
+            } else {
+                setInvisible(i)
             }
         }
     }
 
     override fun onClickItem(position: Int) {
         clickedPositions.add(position)
-        Log.d("TAG", "positions: ${clickedPositions}")
-
-
         binding.recyclerView
             .findViewHolderForAdapterPosition(position)?.
             itemView?.findViewById<TextView>(R.id.textView)?.text = contentArray[position]
@@ -155,44 +138,46 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         if(clickedPositions.size == 2){
             val position1 = clickedPositions.first()
             val position2 = clickedPositions.last()
-            var item1 = contentArray[position1]
-            var item2 = contentArray[position2]
-            if(item1.equals(item2)){
-                binding.recyclerView
-                    .findViewHolderForAdapterPosition(position1)?.
-                    itemView?.visibility = View.INVISIBLE
-                binding.recyclerView
-                    .findViewHolderForAdapterPosition(position2)?.
-                    itemView?.visibility = View.INVISIBLE
+            val item1 = contentArray[position1]
+            val item2 = contentArray[position2]
+            if(item1 == item2){
+                setInvisible(position1)
+                setInvisible(position2)
                 hiddenCount += 2
-                if(hiddenCount == cardsCount * 2){
+                if(hiddenCount == cardsCount){
                     val intent = Intent(this, FinalActivity::class.java)
                     startActivity(intent)
                 }
             } else {
-                binding.recyclerView
-                    .findViewHolderForAdapterPosition(position1)?.
-                    itemView?.findViewById<TextView>(R.id.textView)?.text = "?"
-                binding.recyclerView
-                    .findViewHolderForAdapterPosition(position2)?.
-                    itemView?.findViewById<TextView>(R.id.textView)?.text = "?"
+                setQuestion(position1)
+                setQuestion(position2)
             }
             clickedPositions.clear()
         }
     }
 
 
+    private fun setQuestion(position: Int){
+        binding.recyclerView
+            .findViewHolderForAdapterPosition(position)?.
+            itemView?.findViewById<TextView>(R.id.textView)?.text = question
+    }
+
+    private fun setInvisible(position: Int){
+        binding.recyclerView
+            .findViewHolderForAdapterPosition(position)?.
+            itemView?.visibility = View.INVISIBLE
+    }
+
     override fun onStop() {
         super.onStop()
-        Log.d("TAG", "onStop(), count: ${contentArray.size}")
-        var items = contentArray
-//        var visibility: Array<Boolean> = emptyArray()
+        val items = contentArray
 
-        var itemsString  = StringBuilder()
-        var visibilityString = StringBuilder()
+        val itemsString  = StringBuilder()
+        val visibilityString = StringBuilder()
 
         for((index, item) in items.withIndex()){
-            var visible = binding.recyclerView
+            val visible = binding.recyclerView
                 .findViewHolderForAdapterPosition(index)?.
                 itemView?.visibility
 
@@ -205,15 +190,11 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
 
         }
 
-
-        Log.d("TAG", "itemsString: ${itemsString}")
-        Log.d("TAG", "visibilityString: ${visibilityString}")
-
-        var sharedPreferences = getSharedPreferences("memory_sp", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
         sharedPreferences
             .edit()
-            .putString("itemsString", itemsString.toString())
-            .putString("visibilityString", visibilityString.toString())
+            .putString(ITEMS_STRING, itemsString.toString())
+            .putString(VISIBILITY_STRING, visibilityString.toString())
             .apply()
     }
 
