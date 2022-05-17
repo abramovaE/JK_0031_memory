@@ -1,11 +1,11 @@
 package com.template
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -15,11 +15,6 @@ import kotlin.math.sqrt
 
 
 class MemoryActivity: AppCompatActivity(), OnClickPairListener {
-
-    private val SHARED_PREF_NAME = "memory_sp"
-    private val SELECTED_POSITION_TAG = "selected_position"
-    private val ITEMS_STRING = "itemsString"
-    private val VISIBILITY_STRING = "visibilityString"
 
     private lateinit var binding: ActivityMemoryBinding
     private var clickedPositions = mutableSetOf<Int>()
@@ -49,18 +44,24 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         "\uD83D\uDEF8", "\uD83D\uDE81", "\uD83D\uDEF6", "\uD83C\uDFA0",
         "\uD83D\uDEA4", "\uD83D\uDEF4", "\uD83D\uDE80", "\uD83D\uDEF0")
 
+    override fun onResume() {
+        super.onResume()
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMemoryBinding.inflate(layoutInflater)
 
-        selectedMode = intent.getIntExtra(SELECTED_POSITION_TAG, 0)
+        selectedMode = App.getSelectedPosition()
 
-        val itemsString = intent.getStringExtra(ITEMS_STRING)
-        val visibilityString = intent.getStringExtra(VISIBILITY_STRING)
+        val itemsString = App.getItemsString()
+        val visibilityString = App.getVisibilityString()
 
-        if (!itemsString.isNullOrBlank() && !visibilityString.isNullOrBlank()) {
+        if (itemsString.isNotBlank() && visibilityString.isNotBlank()) {
             continueGame(itemsString, visibilityString)
         } else{
+
             createNewGame(selectedMode)
         }
 
@@ -70,9 +71,6 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         binding.recyclerView.adapter = memoryAdapter
 
         isClickable = false
-
-//        binding.recyclerView.isClickable = false
-//        binding.recyclerView.isSelected = false
 
         showAllCards()
         val timer = object : CountDownTimer(3000, 1000) {
@@ -150,11 +148,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
                 isClickable = false
             }
 
-            var timer = object: CountDownTimer(1000, 1000){
+            val timer = object: CountDownTimer(1000, 1000){
                 override fun onTick(p0: Long) {}
                 override fun onFinish() {
                     if (clickedPositions.size == 2) {
-
                         val position1 = clickedPositions.first()
                         val position2 = clickedPositions.last()
                         val item1 = contentArray[position1]
@@ -163,9 +160,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
                             setInvisible(position1)
                             setInvisible(position2)
                             hiddenCount += 2
-                            if (hiddenCount == cardsCount) {
+                            if (isGameFinished()) {
+                                App.clearSharedPreferences()
                                 val intent = Intent(this@MemoryActivity, FinalActivity::class.java)
-                                intent.putExtra(SELECTED_POSITION_TAG, selectedMode)
+                                App.setSelectedPosition(selectedMode)
                                 startActivity(intent)
                             }
                         } else {
@@ -175,7 +173,6 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
                         clickedPositions.clear()
                         isClickable = true
                     }
-
                 }
             }
             timer.start()
@@ -183,6 +180,11 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         }
     }
 
+    private fun isGameFinished(): Boolean{
+        val count = visibility.filter{ it == View.INVISIBLE }.count()
+        Log.d("TAG", "invisible: $count")
+        return count == cardsCount
+    }
 
     private fun setQuestion(position: Int){
         binding.recyclerView
@@ -194,6 +196,7 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         binding.recyclerView
             .findViewHolderForAdapterPosition(position)?.
             itemView?.visibility = View.INVISIBLE
+        visibility[position] = View.INVISIBLE
     }
 
     override fun onStop() {
@@ -215,20 +218,12 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
                 itemsString.append("***")
                 visibilityString.append("***")
             }
-
         }
 
-        val sharedPreferences = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
-        sharedPreferences
-            .edit()
-            .putString(ITEMS_STRING, itemsString.toString())
-            .putString(VISIBILITY_STRING, visibilityString.toString())
-            .putInt(SELECTED_POSITION_TAG, selectedMode)
-            .commit()
+        App.setItemsString(itemsString.toString())
+        App.setVisibilityString(visibilityString.toString())
+        App.setSelectedPosition(selectedMode)
     }
-
-
-
 }
 
 

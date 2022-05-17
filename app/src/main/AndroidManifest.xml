@@ -3,6 +3,7 @@
     package="com.template">
 
     <application
+        android:name=".App"
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

@@ -28,6 +28,6 @@ class MemoryAdapter(private val cards: Array<String>,
     }
 
     class MemoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        val textView = itemView.findViewById<TextView>(R.id.textView)
+        val textView = itemView.findViewById<TextView>(R.id.textView)!!
     }
 }
