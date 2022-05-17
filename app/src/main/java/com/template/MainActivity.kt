@@ -11,6 +11,7 @@ import android.R
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import android.view.View
 
 
@@ -27,6 +28,10 @@ class MainActivity : AppCompatActivity() {
         var spSelectedPosition = sharedPreferences.getInt("selected_position", selectedPosition)
         var itemsString = sharedPreferences.getString("itemsString", "")
         var visibilityString = sharedPreferences.getString("visibilityString", "")
+
+        Log.d("TAG", "itemsString: ${itemsString}")
+        Log.d("TAG", "visibilityString: ${visibilityString}")
+
 
         val modes = arrayOf("2x2", "4x4", "6x6", "8x8")
         bining.apply {
@@ -45,22 +50,27 @@ class MainActivity : AppCompatActivity() {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
 
-            playImgBtn.setOnClickListener({
+            playBtn.setOnClickListener({
                 var intent = Intent(this@MainActivity, MemoryActivity::class.java)
                 intent.putExtra("selectedMode", selectedPosition)
                 startActivity(intent)
             })
 
-            if(!itemsString.isNullOrBlank() && !visibilityString.isNullOrBlank()){
-                continueImgBtn.visibility = View.VISIBLE
-                continueImgBtn.setOnClickListener({
+
+
+
+            if(!itemsString.isNullOrEmpty() && !visibilityString.isNullOrEmpty()){
+                Log.d("TAG", "itemsString: ${itemsString.isNullOrEmpty()}")
+                Log.d("TAG", "visibilityString: ${visibilityString.isNullOrEmpty()}")
+                continueBtn.visibility = View.VISIBLE
+                continueBtn.setOnClickListener({
                     var intent = Intent(this@MainActivity, MemoryActivity::class.java)
                     intent.putExtra("itemsString", itemsString)
                     intent.putExtra("visibilityString", visibilityString)
                     startActivity(intent)
                 })
             } else {
-                continueImgBtn.visibility = View.GONE
+                continueBtn.visibility = View.GONE
             }
 
 

@@ -3,6 +3,7 @@ package com.template
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.TextureView
 import android.view.View
@@ -18,10 +19,13 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
     private lateinit var binding: ActivityMemoryBinding
     private var clickedPositions = mutableSetOf<Int>()
     private lateinit var contentArray: Array<String>
+    private lateinit var visibility: Array<Int>
+
     private lateinit var memoryAdapter: MemoryAdapter
     private var hiddenCount = 0
     private var cardsCount = 0;
 
+//    private val itemsStringTa
     private var memoryContent = arrayOf(
         "\uD83D\uDE97", "\uD83D\uDE95", "\uD83D\uDE99", "\uD83D\uDE8C",
         "\uD83D\uDE8E", "\uD83C\uDFCE", "\uD83D\uDE93", "\uD83D\uDE91",
@@ -43,51 +47,100 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         var visibilityString = intent.getStringExtra("visibilityString")
         if (!itemsString.isNullOrBlank() && !visibilityString.isNullOrBlank()) {
             continueGame(itemsString, visibilityString)
+
+
         } else{
+
             createNewGame(selectedMode)
         }
+
+        showAllCards()
+        val timer = object : CountDownTimer(3000, 1000) {
+            override fun onTick(p0: Long) {
+                Log.d("TAG", "onTick()")
+            }
+            override fun onFinish() {
+                hideAllCards()
+            }
+        }
+        timer.start()
+
         setContentView(binding.root)
     }
 
     private fun continueGame(itemsString: String,
                              visibilityString: String){
-        cardsCount = itemsString.length
-        Log.d("TAG", "cardsCount: $cardsCount")
-        val cards = memoryContent.copyOfRange(0, cardsCount)
-        Log.d("TAG", "cards: ${cards.size}")
-        contentArray = itemsString.split("***").toTypedArray()
-        var visibilityArray = visibilityString.split("***").toTypedArray()
 
-        memoryAdapter = MemoryAdapter(contentArray, visibilityArray, this)
+        contentArray = itemsString.split("***").toTypedArray()
+        cardsCount = contentArray.size
+        var visibilityArray = visibilityString.split("***").toTypedArray()
+        visibility = emptyArray()
+        for(item in visibilityArray){
+            visibility += item.toInt()
+        }
+        memoryAdapter = MemoryAdapter(contentArray, visibility, this)
         val manager = binding.recyclerView.layoutManager as GridLayoutManager
         manager.spanCount = Math.sqrt(cardsCount * 1.0).toInt()
         binding.recyclerView.adapter = memoryAdapter
     }
 
     private fun createNewGame(selectedMode: Int){
-        Log.d("TAG", "createNewGame")
+        Log.d("TAG", "createNewGame()")
         val mode = arrayOf(2, 4, 6, 8)
         cardsCount = mode[selectedMode] * mode[selectedMode] / 2
         Log.d("TAG", "cardsCount: $cardsCount")
         val cards = memoryContent.copyOfRange(0, cardsCount)
-        var visibilityArray = emptyArray<String>()
+
+        visibility = emptyArray<Int>()
         for(index in 0 until (mode[selectedMode] * mode[selectedMode])){
-            visibilityArray += "${View.VISIBLE}"
+            visibility += View.VISIBLE
         }
+
+
         Log.d("TAG", "cards: ${cards.size}")
         val content = mutableListOf<String>()
         content.addAll(cards)
         content.addAll(cards)
         content.shuffle()
         contentArray = content.toTypedArray()
-        memoryAdapter = MemoryAdapter(contentArray, visibilityArray, this)
+        memoryAdapter = MemoryAdapter(contentArray, visibility, this)
         val manager = binding.recyclerView.layoutManager as GridLayoutManager
         manager.spanCount = mode[selectedMode]
         binding.recyclerView.adapter = memoryAdapter
 
-        Log.d("TAG", "visibility: ${Arrays.toString(visibilityArray)}")
+        Log.d("TAG", "visibility: ${Arrays.toString(visibility)}")
         Log.d("TAG", "content: ${Arrays.toString(contentArray)}")
 
+
+
+    }
+
+
+    fun showAllCards(){
+        Log.d("TAG", "show all cards, count: ${memoryAdapter.itemCount}")
+        var count = memoryAdapter.itemCount
+        for(i in 0 until count){
+            binding.recyclerView
+                .findViewHolderForAdapterPosition(i)?.
+                itemView?.findViewById<TextView>(R.id.textView)?.text = contentArray[i]
+        }
+    }
+
+    fun hideAllCards(){
+        Log.d("TAG", "hide all cards")
+
+        var count = memoryAdapter.itemCount
+        for(i in 0 until count){
+            if(visibility[i] != View.INVISIBLE) {
+                binding.recyclerView
+                    .findViewHolderForAdapterPosition(i)?.itemView?.findViewById<TextView>(R.id.textView)?.text =
+                    "?"
+            }
+            else {
+                binding.recyclerView
+                    .findViewHolderForAdapterPosition(i)?.itemView?.visibility = View.INVISIBLE
+            }
+        }
     }
 
     override fun onClickItem(position: Int) {
@@ -131,6 +184,7 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
 
     override fun onStop() {
         super.onStop()
+        Log.d("TAG", "onStop(), count: ${contentArray.size}")
         var items = contentArray
 //        var visibility: Array<Boolean> = emptyArray()
 
@@ -140,13 +194,24 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         for((index, item) in items.withIndex()){
             var visible = binding.recyclerView
                 .findViewHolderForAdapterPosition(index)?.
-                itemView?.visibility == View.VISIBLE
-            itemsString.append(item).append("***")
-            visibilityString.append(visible).append("***")
+                itemView?.visibility
+
+            itemsString.append(item)
+            visibilityString.append(visible)
+            if(index != items.size - 1){
+                itemsString.append("***")
+                visibilityString.append("***")
+            }
+
         }
 
+
+        Log.d("TAG", "itemsString: ${itemsString}")
+        Log.d("TAG", "visibilityString: ${visibilityString}")
+
         var sharedPreferences = getSharedPreferences("memory_sp", Context.MODE_PRIVATE)
-        sharedPreferences.edit()
+        sharedPreferences
+            .edit()
             .putString("itemsString", itemsString.toString())
             .putString("visibilityString", visibilityString.toString())
             .apply()
