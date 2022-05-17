@@ -3,38 +3,60 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@color/primary_light">
+
+    <TextView
+        android:id="@+id/gameover_tv"
+        android:textSize="32dp"
+        android:textColor="@color/accent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        tools:text="Game over"
+        app:layout_constraintBottom_toTopOf="@+id/time_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/restart_img_btn"
+        android:textColor="@color/accent"
+        android:textSize="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/gameover_tv"
+        tools:text="Your time: 160 sec" />
 
-    <ImageButton
-        android:id="@+id/restart_img_btn"
+    <androidx.appcompat.widget.AppCompatButton
+        android:text="Restart"
+        android:textColor="@color/primary_text"
+        android:stateListAnimator="@null"
+        android:background="@color/accent"
+        android:id="@+id/restart_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/home_img_btn"
+        app:layout_constraintEnd_toStartOf="@id/home_btn"
         app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
-    <ImageButton
-        android:id="@+id/home_img_btn"
+    <androidx.appcompat.widget.AppCompatButton
+        android:text="Home"
+        android:textColor="@color/primary_text"
+        android:stateListAnimator="@null"
+        android:background="@color/accent"
+        android:id="@+id/home_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/restart_img_btn"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:layout_constraintStart_toEndOf="@+id/restart_btn"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

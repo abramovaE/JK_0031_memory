@@ -17,6 +17,7 @@ class MemoryAdapter(private val cards: Array<String>,
 
     override fun onBindViewHolder(holder: MemoryViewHolder, position: Int) {
         holder.textView.text = cards[position]
+
         holder.textView.setOnClickListener {
             onClickPairListener.onClickItem(position)
         }

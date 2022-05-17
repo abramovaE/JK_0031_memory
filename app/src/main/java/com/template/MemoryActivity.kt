@@ -33,6 +33,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
 
     private val question = "❓"
 
+    private var isClickable = false
+
+    private var selectedMode = 0
+
     private var memoryContent = arrayOf(
         "\uD83D\uDE97", "\uD83D\uDE95", "\uD83D\uDE99", "\uD83D\uDE8C",
         "\uD83D\uDE8E", "\uD83C\uDFCE", "\uD83D\uDE93", "\uD83D\uDE91",
@@ -49,13 +53,13 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMemoryBinding.inflate(layoutInflater)
 
-        val selectedMode = intent.getIntExtra(SELECTED_POSITION_TAG, 0)
+        selectedMode = intent.getIntExtra(SELECTED_POSITION_TAG, 0)
+
         val itemsString = intent.getStringExtra(ITEMS_STRING)
         val visibilityString = intent.getStringExtra(VISIBILITY_STRING)
 
         if (!itemsString.isNullOrBlank() && !visibilityString.isNullOrBlank()) {
             continueGame(itemsString, visibilityString)
-
         } else{
             createNewGame(selectedMode)
         }
@@ -65,7 +69,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         manager.spanCount = spanCount
         binding.recyclerView.adapter = memoryAdapter
 
+        isClickable = false
+
 //        binding.recyclerView.isClickable = false
+//        binding.recyclerView.isSelected = false
 
         showAllCards()
         val timer = object : CountDownTimer(3000, 1000) {
@@ -73,6 +80,7 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
             }
             override fun onFinish() {
                 hideAllCards()
+                isClickable = true
             }
         }
         timer.start()
@@ -130,29 +138,32 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
     }
 
     override fun onClickItem(position: Int) {
-        clickedPositions.add(position)
-        binding.recyclerView
-            .findViewHolderForAdapterPosition(position)?.
-            itemView?.findViewById<TextView>(R.id.textView)?.text = contentArray[position]
+        if(isClickable) {
+            clickedPositions.add(position)
+            binding.recyclerView
+                .findViewHolderForAdapterPosition(position)?.itemView?.findViewById<TextView>(R.id.textView)?.text =
+                contentArray[position]
 
-        if(clickedPositions.size == 2){
-            val position1 = clickedPositions.first()
-            val position2 = clickedPositions.last()
-            val item1 = contentArray[position1]
-            val item2 = contentArray[position2]
-            if(item1 == item2){
-                setInvisible(position1)
-                setInvisible(position2)
-                hiddenCount += 2
-                if(hiddenCount == cardsCount){
-                    val intent = Intent(this, FinalActivity::class.java)
-                    startActivity(intent)
+            if (clickedPositions.size == 2) {
+                val position1 = clickedPositions.first()
+                val position2 = clickedPositions.last()
+                val item1 = contentArray[position1]
+                val item2 = contentArray[position2]
+                if (item1 == item2) {
+                    setInvisible(position1)
+                    setInvisible(position2)
+                    hiddenCount += 2
+                    if (hiddenCount == cardsCount) {
+                        val intent = Intent(this, FinalActivity::class.java)
+                        intent.putExtra(SELECTED_POSITION_TAG, selectedMode)
+                        startActivity(intent)
+                    }
+                } else {
+                    setQuestion(position1)
+                    setQuestion(position2)
                 }
-            } else {
-                setQuestion(position1)
-                setQuestion(position2)
+                clickedPositions.clear()
             }
-            clickedPositions.clear()
         }
     }
 
@@ -195,6 +206,7 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
             .edit()
             .putString(ITEMS_STRING, itemsString.toString())
             .putString(VISIBILITY_STRING, visibilityString.toString())
+            .putInt(SELECTED_POSITION_TAG, selectedMode)
             .apply()
     }
 

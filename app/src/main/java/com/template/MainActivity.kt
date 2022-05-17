@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         val spSelectedPosition = sharedPreferences.getInt(SELECTED_POSITION_TAG, selectedPosition)
         val itemsString = sharedPreferences.getString(ITEMS_STRING, "")
         val visibilityString = sharedPreferences.getString(VISIBILITY_STRING, "")
+        val selectedMode = sharedPreferences.getInt(SELECTED_POSITION_TAG, 0)
 
 
         val modes = arrayOf("2x2", "4x4", "6x6", "8x8")
@@ -61,6 +62,7 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(this@MainActivity, MemoryActivity::class.java)
                     intent.putExtra(ITEMS_STRING, itemsString)
                     intent.putExtra(VISIBILITY_STRING, visibilityString)
+                    intent.putExtra(SELECTED_POSITION_TAG, selectedMode)
                     startActivity(intent)
                 }
             } else {
