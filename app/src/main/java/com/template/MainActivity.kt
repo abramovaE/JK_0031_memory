@@ -16,7 +16,6 @@ class MainActivity : AppCompatActivity() {
     private var spSelectedPosition = 0
     private var itemsString = ""
     private var visibilityString = ""
-
     private lateinit var binding: ActivityMainBinding
 
     private fun load(){
@@ -29,6 +28,18 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         load()
         window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        binding.apply {
+            if(itemsString.isNotEmpty() && visibilityString.isNotEmpty()){
+                continueBtn.visibility = View.VISIBLE
+                continueBtn.setOnClickListener {
+                    val intent = Intent(this@MainActivity, MemoryActivity::class.java)
+                    intent.putExtra("isContinue", true)
+                    startActivity(intent)
+                }
+            } else {
+                continueBtn.visibility = View.GONE
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,14 +47,14 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         var selectedPosition = 0
-
         load()
         val modes = arrayOf("2x2", "4x4", "6x6", "8x8")
         binding.apply {
             val spinnerAdapter = ArrayAdapter(this@MainActivity,
-                android.R.layout.simple_spinner_item, modes)
+                R.layout.spinner_item, modes)
             spinner.setSelection(spSelectedPosition)
-            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+            spinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown)
             spinner.adapter = spinnerAdapter
             spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
@@ -58,21 +69,12 @@ class MainActivity : AppCompatActivity() {
 
             playBtn.setOnClickListener {
                 val intent = Intent(this@MainActivity, MemoryActivity::class.java)
+                intent.putExtra("isContinue", false)
+
                 App.setSelectedPosition(selectedPosition)
                 startActivity(intent)
             }
-
-            if(itemsString.isNotEmpty() && visibilityString.isNotEmpty()){
-                continueBtn.visibility = View.VISIBLE
-                continueBtn.setOnClickListener {
-                    val intent = Intent(this@MainActivity, MemoryActivity::class.java)
-                    startActivity(intent)
-                }
-            } else {
-                continueBtn.visibility = View.GONE
-            }
         }
-
         setContentView(binding.root)
     }
 }

@@ -17,20 +17,30 @@ class FinalActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        App.clearSharedPreferences()
+
         binding = ActivityFinalBinding.inflate(layoutInflater)
 
+        val date = intent.extras?.getString("date")
+
         binding.apply {
+            val text = "${getString(R.string.your_time)}: $date"
+            timeTv.text = text
             homeBtn.setOnClickListener {
                 val homeIntent = Intent(this@FinalActivity, MainActivity::class.java)
-                App.clearSharedPreferences()
                 startActivity(homeIntent)
             }
             restartBtn.setOnClickListener {
                 val restartIntent = Intent(this@FinalActivity, MemoryActivity::class.java)
-                App.clearSharedPreferences()
                 startActivity(restartIntent)
             }
         }
         setContentView(binding.root)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        finish()
     }
 }

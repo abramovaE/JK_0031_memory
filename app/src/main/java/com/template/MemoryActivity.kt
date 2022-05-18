@@ -3,7 +3,6 @@ package com.template
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
@@ -11,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.template.databinding.ActivityMemoryBinding
 import java.lang.StringBuilder
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.sqrt
 
 
@@ -27,10 +28,9 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
     private var spanCount = 0
 
     private val question = "❓"
-
     private var isClickable = false
-
     private var selectedMode = 0
+    private var startTime = 0L
 
     private var memoryContent = arrayOf(
         "\uD83D\uDE97", "\uD83D\uDE95", "\uD83D\uDE99", "\uD83D\uDE8C",
@@ -53,15 +53,15 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMemoryBinding.inflate(layoutInflater)
 
+        val isContinue = intent.extras?.getBoolean("isContinue", false)
         selectedMode = App.getSelectedPosition()
 
         val itemsString = App.getItemsString()
         val visibilityString = App.getVisibilityString()
 
-        if (itemsString.isNotBlank() && visibilityString.isNotBlank()) {
+        if (isContinue == true) {
             continueGame(itemsString, visibilityString)
         } else{
-
             createNewGame(selectedMode)
         }
 
@@ -84,6 +84,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         timer.start()
         setContentView(binding.root)
     }
+
+
+
+
 
     private fun continueGame(itemsString: String,
                              visibilityString: String){
@@ -138,6 +142,9 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
     override fun onClickItem(position: Int) {
         if(isClickable) {
 
+            if(startTime == 0L){
+                startTime = Calendar.getInstance().time.time
+            }
             clickedPositions.add(position)
             binding.recyclerView
                 .findViewHolderForAdapterPosition(position)?.itemView?.
@@ -161,10 +168,15 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
                             setInvisible(position2)
                             hiddenCount += 2
                             if (isGameFinished()) {
+
+                                val formatDate = getFinalTimeString()
+                                startTime = 0L
                                 App.clearSharedPreferences()
                                 val intent = Intent(this@MemoryActivity, FinalActivity::class.java)
+                                intent.putExtra("date", formatDate)
                                 App.setSelectedPosition(selectedMode)
                                 startActivity(intent)
+                                finish()
                             }
                         } else {
                             setQuestion(position1)
@@ -180,9 +192,21 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         }
     }
 
+    private fun getFinalTimeString(): String{
+        val prefTime = App.getTime()
+        val date = getFinalTime(prefTime)
+        val sdf = SimpleDateFormat("mm:ss", Locale.US)
+        return sdf.format(date)
+    }
+
+    private fun getFinalTime(prefTime: Long): Date {
+        val endTime = Calendar.getInstance().time.time
+        val time = endTime - startTime
+        return Date(time + prefTime)
+    }
+
     private fun isGameFinished(): Boolean{
         val count = visibility.filter{ it == View.INVISIBLE }.count()
-        Log.d("TAG", "invisible: $count")
         return count == cardsCount
     }
 
@@ -199,11 +223,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
         visibility[position] = View.INVISIBLE
     }
 
-    override fun onStop() {
-        Log.d("TAG", "onStop()")
-        super.onStop()
-        val items = contentArray
+    override fun onPause() {
+        super.onPause()
 
+        val items = contentArray
         val itemsString  = StringBuilder()
         val visibilityString = StringBuilder()
 
@@ -220,6 +243,10 @@ class MemoryActivity: AppCompatActivity(), OnClickPairListener {
             }
         }
 
+        val date = getFinalTime(0L)
+        startTime = 0L
+
+        App.setTime(date.time)
         App.setItemsString(itemsString.toString())
         App.setVisibilityString(visibilityString.toString())
         App.setSelectedPosition(selectedMode)

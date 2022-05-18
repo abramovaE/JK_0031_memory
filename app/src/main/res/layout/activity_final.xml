@@ -8,55 +8,60 @@
     android:background="@color/primary_light">
 
     <TextView
+        android:fontFamily="@font/amita"
         android:id="@+id/gameover_tv"
-        android:textSize="32dp"
+        android:textSize="32sp"
         android:textColor="@color/accent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        tools:text="Game over"
+        android:text="@string/game_over"
         app:layout_constraintBottom_toTopOf="@+id/time_tv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:fontFamily="@font/amita"
         android:id="@+id/time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:textColor="@color/accent"
-        android:textSize="32dp"
+        android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/gameover_tv"
         tools:text="Your time: 160 sec" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:text="Restart"
-        android:textColor="@color/primary_text"
-        android:stateListAnimator="@null"
-        android:background="@color/accent"
         android:id="@+id/restart_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginBottom="50dp"
+        android:background="@color/accent"
+        android:fontFamily="@font/amita"
+        android:stateListAnimator="@null"
+        android:text="@string/restart"
+        android:textColor="@color/primary_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/home_btn"
         app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:text="Home"
-        android:textColor="@color/primary_text"
-        android:stateListAnimator="@null"
-        android:background="@color/accent"
         android:id="@+id/home_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="50dp"
+        android:background="@color/accent"
+        android:fontFamily="@font/amita"
+        android:stateListAnimator="@null"
+        android:text="@string/home"
+        android:textColor="@color/primary_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/restart_btn"/>
+        app:layout_constraintStart_toEndOf="@+id/restart_btn" />
 </androidx.constraintlayout.widget.ConstraintLayout>

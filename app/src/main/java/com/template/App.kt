@@ -3,6 +3,7 @@ package com.template
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 
 class App: Application() {
 
@@ -14,6 +15,7 @@ class App: Application() {
         spSelectedPosition = sharedPreferences.getInt(SELECTED_POSITION_TAG, 0)
         itemsString = sharedPreferences.getString(ITEMS_STRING, "")!!
         visibilityString = sharedPreferences.getString(VISIBILITY_STRING, "")!!
+        time = sharedPreferences.getLong(TIME, 0L)
     }
 
     companion object {
@@ -21,15 +23,26 @@ class App: Application() {
         private const val SELECTED_POSITION_TAG = "selected_position"
         private const val ITEMS_STRING = "itemsString"
         private const val VISIBILITY_STRING = "visibilityString"
+        private const val TIME = "time"
 
         private var spSelectedPosition = 0
         private var itemsString = ""
         private var visibilityString = ""
         private lateinit var sharedPreferences: SharedPreferences
+        private var time = 0L
 
 
         lateinit var instance: App
             private set
+
+        fun getTime(): Long{
+            return time
+        }
+
+        fun setTime(time: Long){
+            this.time = time
+            sharedPreferences.edit().putLong(TIME, time).apply()
+        }
 
         fun getItemsString(): String{
             return itemsString
@@ -58,17 +71,19 @@ class App: Application() {
             sharedPreferences.edit().putInt(SELECTED_POSITION_TAG, position).apply()
         }
 
-
         fun clearSharedPreferences(){
-            sharedPreferences
-                .edit()
+            itemsString = ""
+            visibilityString = ""
+            spSelectedPosition = 0
+            time = 0L
+            Log.d("TAG", "clear sp")
+            this.sharedPreferences.edit()
                 .remove(ITEMS_STRING)
                 .remove(VISIBILITY_STRING)
                 .remove(SELECTED_POSITION_TAG)
+                .remove(TIME)
                 .apply()
         }
 
     }
-
-
 }

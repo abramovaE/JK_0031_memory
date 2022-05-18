@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">JK_0031_memory</string>
-    <string-array name="spinner_items">
-        <item>2x2</item>
-        <item>4x4</item>
-        <item>6x6</item>
-        <item>8x8</item>
-    </string-array>
+    <string name="your_time">Your time</string>
+    <string name="play">Play</string>
+    <string name="cont">Continue</string>
+    <string name="game_over">Game over</string>
+    <string name="restart">Restart</string>
+    <string name="home">Home</string>
 </resources>

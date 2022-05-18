@@ -12,28 +12,28 @@
 
     <ImageView
         android:id="@+id/icon_img_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginStart="128dp"
         android:layout_marginBottom="32dp"
         android:src="@mipmap/ic_launcher"
         app:layout_constraintBottom_toTopOf="@+id/app_name"
         app:layout_constraintStart_toStartOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        tools:srcCompat="@tools:sample/avatars"
+        tools:ignore="ContentDescription" />
 
     <Spinner
         android:id="@+id/spinner"
-        android:layout_width="200dp"
-        android:layout_height="150dp"
-        android:layout_marginStart="132dp"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/icon_img_view"
+        app:layout_constraintEnd_toEndOf="@id/continue_btn"
+        app:layout_constraintStart_toStartOf="@+id/play_btn"
         app:layout_constraintTop_toBottomOf="@+id/play_btn"
         tools:ignore="SpeakableTextPresentCheck" />
 
     <TextView
+        android:fontFamily="@font/amita"
         android:id="@+id/app_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -41,39 +41,41 @@
         android:text="@string/app_name"
         android:textColor="@color/accent"
         android:textColorHint="@color/primary_text"
-        android:textSize="32dp"
+        android:textSize="32sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/icon_img_view"
         app:layout_constraintStart_toStartOf="@+id/icon_img_view" />
 
 
     <androidx.appcompat.widget.AppCompatButton
-        android:textColor="@color/primary_text"
-        android:stateListAnimator="@null"
-        android:background="@color/accent"
         android:id="@+id/play_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
-        android:layout_marginEnd="32dp"
-        android:text="play"
+        android:background="@color/accent"
+        android:fontFamily="@font/amita"
+        android:stateListAnimator="@null"
+        android:text="@string/play"
+        android:textColor="@color/primary_text"
         app:layout_constraintEnd_toStartOf="@id/continue_btn"
         app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="@id/spinner"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintStart_toEndOf="@id/icon_img_view"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:stateListAnimator="@null"
-        android:textColor="@color/primary_text"
-        android:background="@color/accent"
-        android:text="continue"
         android:id="@+id/continue_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
+        android:background="@color/accent"
+        android:fontFamily="@font/amita"
+        android:stateListAnimator="@null"
+        android:text="@string/cont"
+        android:textColor="@color/primary_text"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/play_btn"
-        app:layout_constraintEnd_toEndOf="@id/spinner"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/play_btn"
-        app:layout_constraintTop_toTopOf="@+id/play_btn"/>
+        app:layout_constraintTop_toTopOf="@+id/play_btn"
+        app:layout_constraintVertical_bias="0.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>
